@@ -19,21 +19,20 @@ public class Texture {
 		texture = load(path);
 	}
 	
-	private int load(String path){
+	private int load(String path) {
 		int[] pixels = null;
-		try{
+		try {
 			BufferedImage image = ImageIO.read(new FileInputStream(path));
 			width = image.getWidth();
 			height = image.getHeight();
 			pixels = new int[width * height];
 			image.getRGB(0, 0, width, height, pixels, 0, width);
-		}
-		catch(IOException e){
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		int[] data = new int[width * height];
-		for(int i = 0; i < width * height; i++){
+		for (int i = 0; i < width * height; i++) {
 			int a = (pixels[i] & 0xff000000) >> 24;
 			int r = (pixels[i] & 0xff0000) >> 16;
 			int g = (pixels[i] & 0xff00) >> 8;
@@ -51,10 +50,11 @@ public class Texture {
 		return result;
 	}
 	
-	public void bind(){
+	public void bind() {
 		glBindTexture(GL_TEXTURE_2D, texture);
 	}
-	public void unbind(){
+	
+	public void unbind() {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
