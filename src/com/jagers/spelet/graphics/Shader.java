@@ -12,7 +12,7 @@ public class Shader {
 	public static final int VERTEX_ATTRIB = 0;
 	public static final int TCOORD_ATTRIB = 1;
 	
-	public static Shader BG, PLAYER, PIPE, FADE;
+	public static Shader BG, PLAYER, FADE;
 	
 	private boolean enabled = false;
 	
@@ -26,7 +26,6 @@ public class Shader {
 	public static void loadAll() {
 		BG = new Shader("Shaders/bg.vert", "Shaders/bg.frag");
 		PLAYER = new Shader("Shaders/player.vert", "Shaders/player.frag");
-		PIPE = new Shader("Shaders/pipe.vert", "Shaders/pipe.frag");
 		FADE = new Shader("Shaders/fade.vert", "Shaders/fade.frag");
 	}
 	

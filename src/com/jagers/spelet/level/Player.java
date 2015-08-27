@@ -17,6 +17,7 @@ public class Player {
 	private Vector3f position = new Vector3f();
 	private float rot;
 	private float delta = 0.0f;
+	private float alpha = 0.0f;
 	
 	public Player() {
 		float[] vertices = new float[] {
@@ -44,11 +45,49 @@ public class Player {
 	
 	public void update() {
 		position.y -= delta;
+		position.x -= alpha;
+		delta = 0.0f;
+		alpha = 0.0f;
+		if(Input.isKeyDown(GLFW_KEY_W) || Input.isKeyDown(GLFW_KEY_UP))
+		{
+			delta = -0.25f;
+		}
+		if(Input.isKeyDown(GLFW_KEY_S) || Input.isKeyDown(GLFW_KEY_DOWN))
+		{
+			if(position.y > -3.65f)
+			{
+				delta = +0.25f;
+			}
+		}
+		if(Input.isKeyDown(GLFW_KEY_D) || Input.isKeyDown(GLFW_KEY_RIGHT))
+		{
+			if(position.x < 9.7f)
+			{
+				alpha = -0.10f;
+			}
+		}
+		if(Input.isKeyDown(GLFW_KEY_A) || Input.isKeyDown(GLFW_KEY_LEFT))
+		{
+			if(position.x > -9.5f)
+			{
+				alpha = +0.10f;
+			}
+		}
+		if(Input.isKeyDown(GLFW_KEY_ESCAPE))
+		{
+			
+		}
 		if (Input.isKeyDown(GLFW_KEY_SPACE)) 
+		{
 			delta = -0.15f;
-		else
-			delta += 0.01f;
+		}
+		if(position.y > -3.65f)
+		{
+			delta += 0.1f;
+		}
 		
+		//System.out.println("Alpha: " + position.x);
+		//System.out.println("Delta: " + position.y);
 		rot = -delta * 90.0f;
 	}
 	
