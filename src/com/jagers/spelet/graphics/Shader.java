@@ -12,7 +12,7 @@ public class Shader {
 	public static final int VERTEX_ATTRIB = 0;
 	public static final int TCOORD_ATTRIB = 1;
 	
-	public static Shader BG, PLAYER, FADE;
+	public static Shader BG, PLAYER, FADE, OPPONENT;
 	
 	private boolean enabled = false;
 	
@@ -27,6 +27,7 @@ public class Shader {
 		BG = new Shader("Shaders/bg.vert", "Shaders/bg.frag");
 		PLAYER = new Shader("Shaders/player.vert", "Shaders/player.frag");
 		FADE = new Shader("Shaders/fade.vert", "Shaders/fade.frag");
+		OPPONENT = new Shader("Shaders/opponent.vert", "Shaders/opponent.frag");
 	}
 	
 	public int getUniform(String name) {

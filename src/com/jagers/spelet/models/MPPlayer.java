@@ -2,8 +2,8 @@ package com.jagers.spelet.models;
 
 public class MPPlayer {
 	
-	private float ivX = 1;
-	private float ivY = 1;
+	private float ivX = 0;
+	private float ivY = 0;
 	private final Object lock = new Object();	
 	
     public void changeX(float x) {

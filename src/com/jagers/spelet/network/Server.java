@@ -3,10 +3,10 @@ package com.jagers.spelet.network;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.jagers.spelet.level.Player;
 import com.jagers.spelet.models.MPPlayer;
 
 public class Server implements Runnable {
@@ -15,22 +15,39 @@ public class Server implements Runnable {
 	private Socket connection = null;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
-	private String message;
+	private float message[];
 	private MPPlayer self;
-	private MPPlayer oponent;
+	private MPPlayer opponent;
     
 	public Server(MPPlayer inSelf, MPPlayer inOponent)
 	{
 		this.self = inSelf;
-		this.oponent = inOponent;
+		this.opponent = inOponent;
 	}
+	
+	public void CloseServer() throws IOException
+	{
+		try {
+			if(in!=null)
+				in.close();
+			if(out!=null)
+				out.close();
+			} catch (IOException e1) {
+			e1.printStackTrace();
+			}
+			if(!providerSocket.isClosed())
+				providerSocket.close();
+	}
+	@Override
 	public void run()
     {
-		while(true)
+		while(!Thread.currentThread().isInterrupted())
 		{
         try{
             //1. creating a server socket
-            providerSocket = new ServerSocket(9997, 10);
+            providerSocket = new ServerSocket();
+            providerSocket.setReuseAddress(true);
+            providerSocket.bind(new InetSocketAddress(9996));
             //2. Wait for connection
             connection = providerSocket.accept();
             System.out.println("Connection received from " + connection.getInetAddress().getHostName());
@@ -38,22 +55,22 @@ public class Server implements Runnable {
             out = new ObjectOutputStream(connection.getOutputStream());
             out.flush();
             in = new ObjectInputStream(connection.getInputStream());
-            sendMessage("Connection successful");
+            float[] fli = new float[] {3, 4};
+            sendMessage(fli);
             //4. The two parts communicate via the input and output streams
             do{
                 try{
-                    message = (String)in.readObject();
-                    System.out.println("Server>> " + message);
-                    String[] parts = message.split("-");
-                    oponent.changeX(Float.parseFloat(parts[0]));
-                    String x = Float.toString(self.getX());
-                    String y = Float.toString(self.getY());
-                    sendMessage(x + "-" + y);
+                    message = (float[])in.readObject();
+                    opponent.changeX(message[0]);
+                    opponent.changeY(message[1]);
+                    System.out.println("Server>> " + message[0] + " " + message[1]);
+                    float[] fl = new float[] {self.getX(), self.getY()};
+                    sendMessage(fl);
                 }
                 catch(ClassNotFoundException classnot){
                     System.err.println("Data received in unknown format");
                 }
-            }while(!message.equals("bye"));
+            }while(!Thread.currentThread().isInterrupted());
         }
         catch(IOException ioException){
             ioException.printStackTrace();
@@ -61,9 +78,16 @@ public class Server implements Runnable {
         finally{
             //4: Closing connection
             try{
-                in.close();
-                out.close();
-                providerSocket.close();
+        		try {
+        			if(in!=null)
+        				in.close();
+        			if(out!=null)
+        				out.close();
+        			} catch (IOException e1) {
+        			e1.printStackTrace();
+        			}
+        			if(!providerSocket.isClosed())
+        				providerSocket.close();
             }
             catch(IOException ioException){
                 ioException.printStackTrace();
@@ -71,7 +95,7 @@ public class Server implements Runnable {
         }
 		}
     }
-    private void sendMessage(String inMessage)
+    private void sendMessage(float[] inMessage)
     {
         try{
             out.writeObject(inMessage);

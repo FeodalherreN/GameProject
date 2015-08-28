@@ -1,11 +1,9 @@
 package com.jagers.spelet;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -19,10 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import com.jagers.spelet.level.Player;
 import com.jagers.spelet.models.MPPlayer;
 import com.jagers.spelet.network.Client;
-import com.jagers.spelet.network.Server;
 
 public class MainMenu {
 	private JFrame ivFrame;
@@ -36,8 +32,6 @@ public class MainMenu {
 	private JLabel ivStartGame;
 	private JLabel ivFindGame;
 	private JLabel ivAbout;
-	
-	private Client ivClient;
 	
 	public MainMenu()
 	{
@@ -54,7 +48,7 @@ public class MainMenu {
 	{
 		ivFrame.setSize(1280, 720);
 		ivFrame.setTitle("Main menu");
-		ivFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		ivFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		ivFrame.setLocationRelativeTo(null);
 		ivFrame.getContentPane().setBackground(Color.BLACK);
 		ivFrame.setLayout(new GridLayout());
@@ -115,6 +109,8 @@ public class MainMenu {
         		clientThread.setDaemon(true); // important, otherwise JVM does not exit at end of main()
         		clientThread.start(); 
         		ivFindGameFrame.setVisible(false);
+        		ivFrame.setVisible(false);
+		    	new StartGame().join();
             }
         });
 		ivFindPanel.add(ivLblIP);

@@ -5,6 +5,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.glfw.GLFWvidmode;
@@ -18,6 +19,7 @@ import com.jagers.spelet.math.Matrix4f;
 import com.jagers.spelet.models.MPPlayer;
 import com.jagers.spelet.network.Client;
 import com.jagers.spelet.network.Server;
+import com.jagers.spelet.utils.StaticValues;
 
 public class StartGame implements Runnable {
 	private int width = 1280;
@@ -25,32 +27,36 @@ public class StartGame implements Runnable {
 	
 	private Thread gameThread;
 	private Thread conThread;
-	private Client client;
 	private Server server;
 	private MPPlayer self;
-	private MPPlayer oponent;
-	private boolean running = false;
+	private MPPlayer opponent;
 	
 	private long window;
 	
 	private Level level;
 	public void hostGame() {
-		running = true;
+		StaticValues.running = true;
 		gameThread = new Thread(this, "Game");
 		gameThread.start();
 	}
-	
-	
-	public void start() {
-		running = true;
+	public void join()
+	{
+		StaticValues.running = true;
 		gameThread = new Thread(this, "Game");
 		self = new MPPlayer();
-		oponent = new MPPlayer();
+		opponent = new MPPlayer();
 		gameThread.start();
-		Server server = new Server(self, oponent); 
-		Thread myThread = new Thread(server);
-		myThread.setDaemon(true); // important, otherwise JVM does not exit at end of main()
-		myThread.start();
+	}
+	public void start() {
+		StaticValues.running = true;
+		gameThread = new Thread(this, "Game");
+		self = new MPPlayer();
+		opponent = new MPPlayer();
+		gameThread.start();
+		server = new Server(self, opponent); 
+	    conThread = new Thread(server);
+	    conThread.setDaemon(true); // important, otherwise JVM does not exit at end of main()
+	    conThread.start();
 	}
 	
 	private void init() {
@@ -90,7 +96,10 @@ public class StartGame implements Runnable {
 		Shader.PLAYER.setUniformMat4f("pr_matrix", pr_matrix);
 		Shader.PLAYER.setUniform1i("tex", 1);
 		
-		level = new Level();
+		Shader.OPPONENT.setUniformMat4f("pr_matrix", pr_matrix);
+		Shader.OPPONENT.setUniform1i("tex", 1);
+		
+		level = new Level(self, opponent);
 	}
 	
 	public void run() {
@@ -102,7 +111,7 @@ public class StartGame implements Runnable {
 		long timer = System.currentTimeMillis();
 		int updates = 0;
 		int frames = 0;
-		while (running) {
+		while (StaticValues.running == true) {
 			long now = System.nanoTime();
 			delta += (now - lastTime) / ns;
 			lastTime = now;
@@ -115,14 +124,22 @@ public class StartGame implements Runnable {
 			frames++;
 			if (System.currentTimeMillis() - timer > 1000) {
 				timer += 1000;
-				System.out.println(updates + " ups, " + frames + " fps");
+				//System.out.println(updates + " ups, " + frames + " fps");
 				updates = 0;
 				frames = 0;
 			}
 			if (glfwWindowShouldClose(window) == GL_TRUE)
-				running = false;
+				StaticValues.running = false;
 		}
-		
+		conThread.interrupt();
+		gameThread.interrupt();
+		try {
+			server.CloseServer();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Threads interrupted");
 		glfwDestroyWindow(window);
 		glfwTerminate();
 	}
@@ -131,7 +148,7 @@ public class StartGame implements Runnable {
 		glfwPollEvents();
 		level.update();
 		if (level.isGameOver()) {
-			level = new Level();
+			level = new Level(self, opponent);
 		}
 	}
 	

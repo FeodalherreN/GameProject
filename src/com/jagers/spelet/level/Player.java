@@ -7,19 +7,22 @@ import com.jagers.spelet.graphics.Texture;
 import com.jagers.spelet.graphics.VertexArray;
 import com.jagers.spelet.math.Matrix4f;
 import com.jagers.spelet.math.Vector3f;
+import com.jagers.spelet.models.MPPlayer;
 import com.jagers.spelet.input.Input;
 
 public class Player {
 	private float SIZE = 1.0f;
 	private VertexArray mesh;
 	private Texture texture;
+	private MPPlayer self;
 	
 	private Vector3f position = new Vector3f();
 	private float rot;
 	private float delta = 0.0f;
 	private float alpha = 0.0f;
 	
-	public Player() {
+	public Player(MPPlayer inSelf, MPPlayer inOpponent) {
+		this.self = inSelf;
 		float[] vertices = new float[] {
 			-SIZE / 2.0f, -SIZE / 2.0f, 0.2f,
 			-SIZE / 2.0f,  SIZE / 2.0f, 0.2f,
@@ -85,7 +88,8 @@ public class Player {
 		{
 			delta += 0.1f;
 		}
-		
+		self.changeX(position.x);
+		self.changeY(position.y);
 		//System.out.println("Alpha: " + position.x);
 		//System.out.println("Delta: " + position.y);
 		rot = -delta * 90.0f;

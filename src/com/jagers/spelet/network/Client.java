@@ -6,22 +6,21 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import com.jagers.spelet.level.Player;
 import com.jagers.spelet.models.MPPlayer;
 
 public class Client implements Runnable {
 	private Socket requestSocket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
-	private String message;
+	private float[] message;
 	private String ip;
 	private MPPlayer self;
-	private MPPlayer oponent;
+	private MPPlayer opponent;
 	
     public Client(String inIp, MPPlayer inSelf, MPPlayer inOponent)
     {
 		this.self = inSelf;
-		this.oponent = inOponent;
+		this.opponent = inOponent;
     	this.ip = inIp;
     }
     public void run()
@@ -30,7 +29,8 @@ public class Client implements Runnable {
     	{
         try{
             //1. creating a socket to connect to the server
-            requestSocket = new Socket(ip, 9997);
+            requestSocket = new Socket(ip, 9996);
+            requestSocket.setReuseAddress(true);
             System.out.println("Connected to localhost in port 9999");
             //2. get Input and Output streams
             out = new ObjectOutputStream(requestSocket.getOutputStream());
@@ -39,18 +39,17 @@ public class Client implements Runnable {
             //3: Communicating with the server
             do{
                 try{
-                    message = (String)in.readObject();
-                    System.out.println("Client>> " + message);
-                    String[] parts = message.split("-");
-                    oponent.changeX(Float.parseFloat(parts[0]));
-                    String x = Float.toString(self.getX());
-                    String y = Float.toString(self.getY());
-                    sendMessage(x + "-" + y);
+                    message = (float[])in.readObject();
+                    opponent.changeX(message[0]);
+                    opponent.changeY(message[1]);
+                    System.out.println("Client>> " + message[0] + " " + message[1]);
+                    float[] fl = new float[]{self.getX(), self.getY()};
+                    sendMessage(fl);
                 }
                 catch(ClassNotFoundException classNot){
                     System.err.println("data received in unknown format");
                 }
-            }while(!message.equals("bye"));
+            }while(true);
         }
         catch(UnknownHostException unknownHost){
             System.err.println("You are trying to connect to an unknown host!");
@@ -71,7 +70,7 @@ public class Client implements Runnable {
         }
     	}
     }
-    private void sendMessage(String Coordinates)
+    private void sendMessage(float[] Coordinates)
     {
         try{
             out.writeObject(Coordinates);
